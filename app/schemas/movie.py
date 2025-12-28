@@ -13,5 +13,5 @@ class Movie(BaseModel):
 class MovieDetails(Movie):
     overview: str | None = None
     cast: List[str] = Field(default_factory=list)
-    directors: str | None = None
+    directors: List[str] = Field(default_factory=list)
     trailer_url: str | None = None

@@ -1,7 +1,7 @@
 import time
 import requests
 from typing import List , Optional
-from schemas.movie import Movie
+from schemas.movie import Movie , MovieDetails
 from services.llm_service import extract_intent
 from api.utils.cache import LocalCache
 from api.utils.cache_keys import build_movie_cache_key , build_search_cache_key
@@ -127,7 +127,7 @@ def fetch_movie_details(movie_id: int) -> Optional[dict]:
     except requests.RequestException as e:
         raise RuntimeError(f"Error fetching movie {movie_id}") from e
 
-def get_movie_by_id(movie_id: int) -> Optional[dict]:
+def get_movie_by_id(movie_id: int) -> MovieDetails | None:
     cache_key = build_movie_cache_key(movie_id=movie_id)
     
     result = cache.get(cache_key)
@@ -142,17 +142,38 @@ def get_movie_by_id(movie_id: int) -> Optional[dict]:
     
     # convert to Movie object
 
+    # release date
     release_date = raw_data.get("release_date", "")
     year = int(release_date.split("-")[0]) if release_date else None
 
+    # top 10 cast
+    cast = [
+        c["name"] for c in raw_data.get("credits" , {}).get("cast" , [])[:10]
+    ]
 
-    movie = Movie(
+    # directors
+    directors = [
+        c["name"] for c in raw_data.get("credits" , {}).get("crew" , []) if c.get("job")=="Director"
+    ]
+
+    trailer_url = None
+    for video in raw_data.get("videos", {}).get("results", []):
+        if video.get("type") == "Trailer" and video.get("site") == "YouTube":
+            trailer_url = f"https://www.youtube.com/watch?v={video['key']}"
+            break
+
+
+    movie = MovieDetails(
         id=raw_data.get("id"),
         title=raw_data.get("title"),
         release_year=year,
         rating=raw_data.get("vote_average"),
         poster_url=build_poster_url(raw_data.get("poster_path")),
         genre=[g["name"] for g in raw_data.get("genres", [])],
+        cast=cast,
+        directors=directors,
+        overview=raw_data.get("overview"),
+        trailer_url=trailer_url,
     )
 
     # cache the result
