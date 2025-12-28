@@ -1,4 +1,4 @@
-import time
+from fastapi import HTTPException
 import requests
 from typing import List , Optional
 from schemas.movie import Movie , MovieDetails
@@ -6,9 +6,10 @@ from services.llm_service import extract_intent
 from api.utils.cache import LocalCache
 from api.utils.cache_keys import build_movie_cache_key , build_search_cache_key
 
+
 TMDB_BASE_URL="https://api.themoviedb.org/3"
 TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p"
-TMDB_API_KEY="YOUR TMDB API KEY HERE"
+TMDB_API_KEY="d52329235f9dfa990eeda588623cf88e"
 
 TMDB_GENRE_MAP = {
     28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
@@ -124,8 +125,17 @@ def fetch_movie_details(movie_id: int) -> Optional[dict]:
         response.raise_for_status()
         return response.json()
 
+    except requests.exceptions.Timeout:
+        raise HTTPException(
+            status_code=504,
+            detail="TMDB request timed out"
+        )
+
     except requests.RequestException as e:
-        raise RuntimeError(f"Error fetching movie {movie_id}") from e
+        raise HTTPException(
+            status_code=502,
+            detail=f"TMDB request failed for movie {movie_id}"
+        )
 
 def get_movie_by_id(movie_id: int) -> MovieDetails | None:
     cache_key = build_movie_cache_key(movie_id=movie_id)

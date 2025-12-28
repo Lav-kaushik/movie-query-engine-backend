@@ -3,8 +3,8 @@ from groq import Groq
 from string import Template
 from schemas.intent import SearchIntent
 
-GROQ_API_KEY="YOUR GROQ API KEY HERE"
 
+GROQ_API_KEY="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"
 client = Groq(api_key=GROQ_API_KEY)
 
 PROMPT_TEMPLATE = Template(r"""
