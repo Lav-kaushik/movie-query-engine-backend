@@ -7,7 +7,7 @@ from api.utils.rate_limiter import RateLimiter
 
 router = APIRouter(prefix="/api/search" , tags=["Search"])
 
-rate_limiter = RateLimiter(max_requests=12 , window_time=60)
+rate_limiter = RateLimiter(max_requests=30 , window_time=60)
 
 def rate_limit(req: Request):
     rate_limiter.is_valid(request=req)

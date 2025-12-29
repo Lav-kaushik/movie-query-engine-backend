@@ -108,7 +108,7 @@ def search_by_intent(query: str) -> List[Movie]:
 
     return movies
 
-def fetch_movie_details(movie_id: int) -> Optional[dict]:
+def fetch_movie_details(movie_id: int , retries:int = 2) -> Optional[dict]:
     url = f"{TMDB_BASE_URL}/movie/{movie_id}"
     params = {
         "api_key": TMDB_API_KEY,
@@ -116,26 +116,16 @@ def fetch_movie_details(movie_id: int) -> Optional[dict]:
         "language": "en-US"
     }
 
-    try:
-        response = requests.get(url, params=params, timeout=10)
+    for attempt in range(retries + 1):
+        try:
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            return response.json()
 
-        if response.status_code == 404:
-            return None
-
-        response.raise_for_status()
-        return response.json()
-
-    except requests.exceptions.Timeout:
-        raise HTTPException(
-            status_code=504,
-            detail="TMDB request timed out"
-        )
-
-    except requests.RequestException as e:
-        raise HTTPException(
-            status_code=502,
-            detail=f"TMDB request failed for movie {movie_id}"
-        )
+        except requests.RequestException:
+            if attempt == retries:
+                return None
+    
 
 def get_movie_by_id(movie_id: int) -> MovieDetails | None:
     cache_key = build_movie_cache_key(movie_id=movie_id)
