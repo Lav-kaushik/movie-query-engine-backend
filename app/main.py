@@ -1,16 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes.movies import router as movies_router
-from api.routes.search import router as search_router
+from app.api.routes.movies import router as movies_router
+from app.api.routes.search import router as search_router
 
 app = FastAPI(title="Movie Query Engine")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8080", 
-        "http://127.0.0.1:8080"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

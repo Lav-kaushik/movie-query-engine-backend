@@ -1,9 +1,9 @@
 from fastapi import APIRouter , HTTPException , Depends , Request
 from typing import List
-from schemas.movie import MovieDetails
-from services.llm_service import extract_intent
-from services.tmdb_service import get_movie_by_id
-from api.utils.rate_limiter import RateLimiter
+from app.schemas.movie import MovieDetails
+from app.services.llm_service import extract_intent
+from app.services.tmdb_service import get_movie_by_id
+from app.api.utils.rate_limiter import RateLimiter
 
 router = APIRouter(prefix="/api/movies" , tags=["Movies"])
 

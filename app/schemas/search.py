@@ -1,6 +1,6 @@
 from pydantic import BaseModel , Field
 from typing import List
-from schemas.movie import Movie
+from app.schemas.movie import Movie
 
 class SearchRequest(BaseModel):
     query: str = Field(

@@ -1,9 +1,9 @@
 from fastapi import APIRouter , Query , Depends , Request
 from typing import List
-from schemas.movie import Movie
-from services.llm_service import extract_intent
-from services.tmdb_service import search_by_intent
-from api.utils.rate_limiter import RateLimiter
+from app.schemas.movie import Movie
+from app.services.llm_service import extract_intent
+from app.services.tmdb_service import search_by_intent
+from app.api.utils.rate_limiter import RateLimiter
 
 router = APIRouter(prefix="/api/search" , tags=["Search"])
 

@@ -1,10 +1,10 @@
 from fastapi import HTTPException
 import requests
 from typing import List , Optional
-from schemas.movie import Movie , MovieDetails
-from services.llm_service import extract_intent
-from api.utils.cache import LocalCache
-from api.utils.cache_keys import build_movie_cache_key , build_search_cache_key
+from app.schemas.movie import Movie , MovieDetails
+from app.services.llm_service import extract_intent
+from app.api.utils.cache import LocalCache
+from app.api.utils.cache_keys import build_movie_cache_key , build_search_cache_key
 
 
 TMDB_BASE_URL="https://api.themoviedb.org/3"

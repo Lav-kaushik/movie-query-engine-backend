@@ -1,7 +1,7 @@
 import json
 from groq import Groq
 from string import Template
-from schemas.intent import SearchIntent
+from app.schemas.intent import SearchIntent
 
 
 GROQ_API_KEY="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"
