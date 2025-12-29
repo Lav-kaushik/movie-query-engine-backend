@@ -56,7 +56,7 @@ backend/
 │   │   ├── movie.py
 │   │   └── search.py
 │   └── main.py
-├── requirements.txt
+│   └── requirements.txt
 └── README.md
 ```
 
@@ -131,6 +131,7 @@ GET /api/search
 GET /api/movies/{movie_id}
 
 ---
+
 
 
 
