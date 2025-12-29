@@ -35,30 +35,30 @@ It allows users to search movies using natural language queries and fetch detail
 
 ---
 
-## 📁 Project Structure  
+## Project Structure
 
+```text
 backend/
 ├── app/
-│ ├── api/
-│ │ └── routes/
-│ │ ├── search.py
-│ │ └── movies.py
-│ ├── services/
-│ │ ├── tmdb_service.py
-│ │ ├── movie_service.py
-│ │ ├── search_service.py
-│ │ └── llm_service.py
-│ ├── schemas/
-│ │ └── movie.py
-│ ├── utils/
-│ │ ├── cache.py
-│ │ └── rate_limiter.py
-│ └── main.py
+│   ├── api/
+│   │   ├── routes/
+│   │   │   ├── search.py
+│   │   │   └── movies.py
+│   │   └── utils/
+│   │       ├── cache.py
+│   │       ├── cache_keys.py
+│   │       └── rate_limiter.py
+│   ├── services/
+│   │   ├── tmdb_service.py
+│   │   └── llm_service.py
+│   ├── schemas/
+│   │   ├── intent.py
+│   │   ├── movie.py
+│   │   └── search.py
+│   └── main.py
 ├── requirements.txt
 └── README.md
-
-
----
+```
 
 ## 🔑 API Keys Required
 
@@ -101,17 +101,20 @@ TMDB_API_KEY=your_tmdb_api_key_here
 
 GROQ_API_KEY=your_groq_api_key_here
 
-Add api keys in your shell
+#### Add api keys in your shell
+
+#### Linux
 
 export TMDB_API_KEY=your_tmdb_api_key_here
 
 export GROQ_API_KEY=your_groq_api_key_here
 
-# Windows (cmd)
+#### Windows (cmd)
 
-set TMDB_API_KEY=your_tmdb_api_key_here 
+set TMDB_API_KEY=your_tmdb_api_key_here
 
-set GROQ_API_KEY=your_groq_api_key_here
+set TMDB_API_KEY=your_tmdb_api_key_here
+
 ---
 
 ### 5 Run the server
@@ -128,6 +131,7 @@ GET /api/search
 GET /api/movies/{movie_id}
 
 ---
+
 
 
 
