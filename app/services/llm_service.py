@@ -1,10 +1,11 @@
+import os
 import json
 from groq import Groq
 from string import Template
 from schemas.intent import SearchIntent
 
 
-GROQ_API_KEY="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"
+GROQ_API_KEY=os.environ.get("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
 
 PROMPT_TEMPLATE = Template(r"""

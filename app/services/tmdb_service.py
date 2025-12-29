@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 import requests
+import os
 from typing import List , Optional
 from schemas.movie import Movie , MovieDetails
 from services.llm_service import extract_intent
@@ -9,7 +10,7 @@ from api.utils.cache_keys import build_movie_cache_key , build_search_cache_key
 
 TMDB_BASE_URL="https://api.themoviedb.org/3"
 TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p"
-TMDB_API_KEY="d52329235f9dfa990eeda588623cf88e"
+TMDB_API_KEY=os.environ.get("TMDB_API_KEY")
 
 TMDB_GENRE_MAP = {
     28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
