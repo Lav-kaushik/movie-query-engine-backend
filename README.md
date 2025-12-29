@@ -101,6 +101,17 @@ TMDB_API_KEY=your_tmdb_api_key_here
 
 GROQ_API_KEY=your_groq_api_key_here
 
+Add api keys in your shell
+
+export TMDB_API_KEY=your_tmdb_api_key_here
+
+export GROQ_API_KEY=your_groq_api_key_here
+
+# Windows (cmd)
+
+set TMDB_API_KEY=your_tmdb_api_key_here 
+
+set GROQ_API_KEY=your_groq_api_key_here
 ---
 
 ### 5 Run the server
