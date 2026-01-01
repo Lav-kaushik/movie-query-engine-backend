@@ -1,10 +1,12 @@
+import os
 import json
 from groq import Groq
 from string import Template
 from app.schemas.intent import SearchIntent
 
-
-GROQ_API_KEY="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"
+GROQ_API_KEY=os.environ.get("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    raise RuntimeError("Groq api key is not set.")
 client = Groq(api_key=GROQ_API_KEY)
 
 PROMPT_TEMPLATE = Template(r"""
@@ -26,7 +28,7 @@ User query: "$query"
 
 Return ONLY a JSON object with this exact structure:
 {
-  "titles": [],       // Explicit movie titles from query OR one recommended title if none provided
+  "titles": [],       // Explicit movie titles from the query. If no explicit titles are mentioned, return 3-5 relevant movie titles that best match the user's intent (genre, mood, year, language, etc.). Titles must be well-known and distinct; do not repeat or invent titles.
   "keywords": [],     // Searchable keywords (plot elements, themes, mood descriptors)
   "actors": [],       // Actor names mentioned
   "directors": [],    // Director names mentioned  
@@ -52,7 +54,7 @@ def extract_intent(query: str) -> dict:
     prompt = PROMPT_TEMPLATE.substitute(query=query)
     
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[
             {"role": "system", "content": "You are a movie intent parser. Return only JSON."},
             {"role": "user", "content": prompt}

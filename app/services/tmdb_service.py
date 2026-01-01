@@ -1,15 +1,18 @@
 from fastapi import HTTPException
 import requests
+import os
 from typing import List , Optional
 from app.schemas.movie import Movie , MovieDetails
 from app.services.llm_service import extract_intent
 from app.api.utils.cache import LocalCache
 from app.api.utils.cache_keys import build_movie_cache_key , build_search_cache_key
 
+TMDB_API_KEY=os.environ.get("TMDB_API_KEY")
+if not TMDB_API_KEY:
+    raise RuntimeError("Tmdb api key is not set.")
 
 TMDB_BASE_URL="https://api.themoviedb.org/3"
 TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p"
-TMDB_API_KEY="d52329235f9dfa990eeda588623cf88e"
 
 TMDB_GENRE_MAP = {
     28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
@@ -22,7 +25,7 @@ TMDB_GENRE_MAP = {
 cache = LocalCache()
 SEARCH_CACHE_TTL = 300
 
-def fetch_from_tmdb(search_query: str) -> List[dict]:
+def search_by_title(search_query: str) -> List[dict]:
     url = f"{TMDB_BASE_URL}/search/movie"
     params = {
         "api_key": TMDB_API_KEY,
@@ -75,16 +78,18 @@ def convert_tmdb_results(raw_result: List[dict]) -> List[Movie]:
 
 
 def search_by_intent(query: str) -> List[Movie]:
+    print("Getting intent from  groq...")
     intent = extract_intent(query=query)
 
     titles = intent.titles
+
     title: str
     if titles:
         # take the first title
         title = titles[0]
     else:
         title = query.strip()
-
+    print("Searching for title:",title)
     cache_key = build_search_cache_key(title)
 
     # search in cache
@@ -96,7 +101,8 @@ def search_by_intent(query: str) -> List[Movie]:
     print(f"Cache miss. Fetching '{title}' from TMDB...")
 
     # search using tmdb api
-    raw_result = fetch_from_tmdb(title)
+    print("Getting data from tmdb...")
+    raw_result = search_by_title(title)
 
     movies = convert_tmdb_results(raw_result)
 
