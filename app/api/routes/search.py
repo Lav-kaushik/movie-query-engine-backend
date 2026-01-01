@@ -14,5 +14,6 @@ def rate_limit(req: Request):
 
 @router.get("" , response_model=List[Movie])
 def search_movies(request: Request , query: str = Query(..., min_length=3) , _:None = Depends(rate_limit)):
+    print("Called search_movie endpoint...")
     result = search_by_intent(query)
     return result
