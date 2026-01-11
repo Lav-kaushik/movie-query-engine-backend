@@ -132,3 +132,13 @@ GET /api/movies/{movie_id}
 
 ---
 
+## Dockerfile
+
+```
+docker build -t backend-app:v1 .
+
+docker run -d --network host -e TMDB_API_KEY=your_tmdb_key_here -e GROQ_API_KEY=your_groq_key_here -p 8000:8000 --name backend-cont backend-app:v1
+```
+Choose host network intead of bridge network because sometimes GROQ will not respond to the reqests made by the container.
+
+
