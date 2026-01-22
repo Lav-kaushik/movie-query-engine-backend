@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # clone the github repo
+      # clone the github repository
       - name: Checkout code
         uses: actions/checkout@v4
 
