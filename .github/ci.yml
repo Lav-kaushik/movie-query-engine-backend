@@ -1,0 +1,29 @@
+name: Movie Query Engin CI
+
+# define events
+on:
+  push:
+    branches:
+      [develop_v1 , develop , main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # clone the github repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # containerize the app
+      - name: Build docker image
+        run: docker build -t movie-app:v1 .
+
+      # test the app
+      - name: Run tests
+        run: docker run --rm --network host -e TMDB_API_KEY=${{ secrets.TMDB_API_KEY }} -e GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} movie-app:v1 pytest
+    
+
+
+
