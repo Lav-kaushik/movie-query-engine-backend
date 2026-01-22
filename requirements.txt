@@ -22,3 +22,4 @@ typing-extensions==4.15.0
 typing-inspection==0.4.2
 urllib3==2.6.2
 uvicorn==0.40.0
+pytest==9.0.2
