@@ -1,0 +1,44 @@
+name: Movie Query Engine CI2
+
+on:
+  push:
+    branches:
+      [main , develop , develop_v1]
+  pull_request:
+    branches:
+      [main , develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      
+      - name: Build containerize
+        run: docker build -t movie-app:latest .
+  
+      - name: Save docker image
+        run: docker save movie-app:latest | gzip > image.tar.gzip
+
+      - name: Upload artifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: movie-app-image
+          path: image.tar.gzip
+  
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Download docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: movie-app-image
+      
+      - name: Load image
+        run: gunzip -c image.tar.gz | docker Load
+
+      - name: Run tests
+        run: docker run --rm --network host -e TMDB_API_KEY=${{ secrets.TMDB_API_KEY }} -e GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} movie-app:latest pytest
