@@ -6,6 +6,8 @@ on:
     branches:
       [develop_v1 , develop , main]
   pull_request:
+    branches:
+      [main , develop]
 
 jobs:
   build-and-test:
@@ -23,7 +25,3 @@ jobs:
       # test the app
       - name: Run tests
         run: docker run --rm --network host -e TMDB_API_KEY=${{ secrets.TMDB_API_KEY }} -e GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} movie-app:v1 pytest
-    
-
-
-
