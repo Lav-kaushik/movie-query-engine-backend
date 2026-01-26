@@ -1,29 +1,45 @@
-from fastapi import HTTPException
-import requests
 import os
-from typing import List , Optional
-from app.schemas.movie import Movie , MovieDetails
-from app.services.llm_service import extract_intent
-from app.api.utils.cache import LocalCache
-from app.api.utils.cache_keys import build_movie_cache_key , build_search_cache_key
+from typing import List, Optional
 
-TMDB_API_KEY=os.environ.get("TMDB_API_KEY")
+import requests
+
+from app.api.utils.cache import LocalCache
+from app.api.utils.cache_keys import build_movie_cache_key, build_search_cache_key
+from app.schemas.movie import Movie, MovieDetails
+from app.services.llm_service import extract_intent
+
+TMDB_API_KEY = os.environ.get("TMDB_API_KEY")
 if not TMDB_API_KEY:
     raise RuntimeError("Tmdb api key is not set.")
 
-TMDB_BASE_URL="https://api.themoviedb.org/3"
+TMDB_BASE_URL = "https://api.themoviedb.org/3"
 TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p"
 
 TMDB_GENRE_MAP = {
-    28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
-    80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
-    14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
-    9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
-    10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+    28: "Action",
+    12: "Adventure",
+    16: "Animation",
+    35: "Comedy",
+    80: "Crime",
+    99: "Documentary",
+    18: "Drama",
+    10751: "Family",
+    14: "Fantasy",
+    36: "History",
+    27: "Horror",
+    10402: "Music",
+    9648: "Mystery",
+    10749: "Romance",
+    878: "Science Fiction",
+    10770: "TV Movie",
+    53: "Thriller",
+    10752: "War",
+    37: "Western",
 }
 
 cache = LocalCache()
 SEARCH_CACHE_TTL = 300
+
 
 def search_by_title(search_query: str) -> List[dict]:
     url = f"{TMDB_BASE_URL}/search/movie"
@@ -32,11 +48,11 @@ def search_by_title(search_query: str) -> List[dict]:
         "query": search_query,
         "language": "en-US",
         "page": 1,
-        "include_adult": False
+        "include_adult": False,
     }
 
     try:
-        response = requests.get(url , params=params , timeout=10)
+        response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
 
         data = response.json()
@@ -44,7 +60,7 @@ def search_by_title(search_query: str) -> List[dict]:
     except requests.RequestException as e:
         print(f"Error fetching the data form tmdb: {e}")
         return []
-    
+
 
 def build_poster_url(poster_path: str | None, size: str = "w500") -> str | None:
     if not poster_path:
@@ -58,7 +74,7 @@ def convert_tmdb_results(raw_result: List[dict]) -> List[Movie]:
 
     for item in raw_result:
         release_date = item.get("release_date", "")
-        year = int(release_date.split("-")[0]) if release_date else None 
+        year = int(release_date.split("-")[0]) if release_date else None
 
         genre_ids = item.get("genre_ids", [])
         genre_names = [TMDB_GENRE_MAP.get(g_id, "Unknown") for g_id in genre_ids]
@@ -69,11 +85,11 @@ def convert_tmdb_results(raw_result: List[dict]) -> List[Movie]:
             release_year=year,
             rating=item.get("vote_average"),
             poster_url=build_poster_url(item.get("poster_path")),
-            genre=genre_names
+            genre=genre_names,
         )
 
         movies.append(movie)
-    
+
     return movies
 
 
@@ -89,7 +105,7 @@ def search_by_intent(query: str) -> List[Movie]:
         title = titles[0]
     else:
         title = query.strip()
-    print("Searching for title:",title)
+    print("Searching for title:", title)
     cache_key = build_search_cache_key(title)
 
     # search in cache
@@ -97,7 +113,7 @@ def search_by_intent(query: str) -> List[Movie]:
 
     if result:
         return result
-    
+
     print(f"Cache miss. Fetching '{title}' from TMDB...")
 
     # search using tmdb api
@@ -106,20 +122,17 @@ def search_by_intent(query: str) -> List[Movie]:
 
     movies = convert_tmdb_results(raw_result)
 
-    cache.set(
-        key=cache_key,
-        value=movies,
-        ttl_seconds=SEARCH_CACHE_TTL
-    )
+    cache.set(key=cache_key, value=movies, ttl_seconds=SEARCH_CACHE_TTL)
 
     return movies
 
-def fetch_movie_details(movie_id: int , retries:int = 2) -> Optional[dict]:
+
+def fetch_movie_details(movie_id: int, retries: int = 2) -> Optional[dict]:
     url = f"{TMDB_BASE_URL}/movie/{movie_id}"
     params = {
         "api_key": TMDB_API_KEY,
         "append_to_response": "credits,videos",
-        "language": "en-US"
+        "language": "en-US",
     }
 
     for attempt in range(retries + 1):
@@ -131,21 +144,21 @@ def fetch_movie_details(movie_id: int , retries:int = 2) -> Optional[dict]:
         except requests.RequestException:
             if attempt == retries:
                 return None
-    
+
 
 def get_movie_by_id(movie_id: int) -> MovieDetails | None:
     cache_key = build_movie_cache_key(movie_id=movie_id)
-    
+
     result = cache.get(cache_key)
 
     if result:
         return result
 
     raw_data = fetch_movie_details(movie_id)
-    
+
     if not raw_data:
         return None
-    
+
     # convert to Movie object
 
     # release date
@@ -153,13 +166,13 @@ def get_movie_by_id(movie_id: int) -> MovieDetails | None:
     year = int(release_date.split("-")[0]) if release_date else None
 
     # top 10 cast
-    cast = [
-        c["name"] for c in raw_data.get("credits" , {}).get("cast" , [])[:10]
-    ]
+    cast = [c["name"] for c in raw_data.get("credits", {}).get("cast", [])[:10]]
 
     # directors
     directors = [
-        c["name"] for c in raw_data.get("credits" , {}).get("crew" , []) if c.get("job")=="Director"
+        c["name"]
+        for c in raw_data.get("credits", {}).get("crew", [])
+        if c.get("job") == "Director"
     ]
 
     trailer_url = None
@@ -167,7 +180,6 @@ def get_movie_by_id(movie_id: int) -> MovieDetails | None:
         if video.get("type") == "Trailer" and video.get("site") == "YouTube":
             trailer_url = f"https://www.youtube.com/watch?v={video['key']}"
             break
-
 
     movie = MovieDetails(
         id=raw_data.get("id"),
@@ -183,12 +195,6 @@ def get_movie_by_id(movie_id: int) -> MovieDetails | None:
     )
 
     # cache the result
-    cache.set(
-        key=cache_key,
-        value=movie,
-        ttl_seconds=600
-    )
+    cache.set(key=cache_key, value=movie, ttl_seconds=600)
 
     return movie
-    
-

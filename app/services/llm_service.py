@@ -1,15 +1,18 @@
-import os
 import json
-from groq import Groq
+import os
 from string import Template
+
+from groq import Groq
+
 from app.schemas.intent import SearchIntent
 
-GROQ_API_KEY=os.environ.get("GROQ_API_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise RuntimeError("Groq api key is not set.")
 client = Groq(api_key=GROQ_API_KEY)
 
-PROMPT_TEMPLATE = Template(r"""
+PROMPT_TEMPLATE = Template(
+    r"""
 You are a movie intent parser for a TMDB-based search system. Your job is to analyze the user's query and extract structured information that can be used to search TMDB's API.
 
 The user query may be:
@@ -31,7 +34,7 @@ Return ONLY a JSON object with this exact structure:
   "titles": [],       // Explicit movie titles from the query. If no explicit titles are mentioned, return 3-5 relevant movie titles that best match the user's intent (genre, mood, year, language, etc.). Titles must be well-known and distinct; do not repeat or invent titles.
   "keywords": [],     // Searchable keywords (plot elements, themes, mood descriptors)
   "actors": [],       // Actor names mentioned
-  "directors": [],    // Director names mentioned  
+  "directors": [],    // Director names mentioned
   "genres": []        // Genre names (use TMDB standard genres when possible)
 }
 
@@ -47,17 +50,21 @@ Critical guidelines:
 • When adding a recommended title, choose the most iconic/well-known example
 • Keep arrays empty when no relevant information is extracted
 • Do not include above given Examples in Response
-""")
+"""
+)
 
 
 def extract_intent(query: str) -> dict:
     prompt = PROMPT_TEMPLATE.substitute(query=query)
-    
+
     response = client.chat.completions.create(
         model="openai/gpt-oss-120b",
         messages=[
-            {"role": "system", "content": "You are a movie intent parser. Return only JSON."},
-            {"role": "user", "content": prompt}
+            {
+                "role": "system",
+                "content": "You are a movie intent parser. Return only JSON.",
+            },
+            {"role": "user", "content": prompt},
         ],
         temperature=0.1,
         timeout=10,
@@ -74,5 +81,3 @@ def extract_intent(query: str) -> dict:
         raise ValueError("LLM output must be a JSON object")
 
     return SearchIntent.model_validate(parsed)
-
-        

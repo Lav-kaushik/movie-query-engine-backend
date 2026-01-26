@@ -1,21 +1,22 @@
-import time 
+import time
 from typing import Any
+
 
 class LocalCache:
     def __init__(self):
         # key -> (expires at , details about the movie)
-        self._store: dict[str , tuple[float , Any]] = {}
+        self._store: dict[str, tuple[float, Any]] = {}
 
-    def __is_expired(self , expiry: float) -> bool:
+    def __is_expired(self, expiry: float) -> bool:
         return time.time() > expiry
 
-    def set(self , key: str , value: Any , ttl_seconds: int):
+    def set(self, key: str, value: Any, ttl_seconds: int):
         # store data in cache
         expiry_time = time.time() + ttl_seconds
-        self._store[key] = (expiry_time , value)
-    
+        self._store[key] = (expiry_time, value)
+
     def get(self, key: str) -> Any | None:
-        data = self._store.get(key)  
+        data = self._store.get(key)
 
         if not data:
             return None
@@ -28,7 +29,6 @@ class LocalCache:
             return None
 
         return value
-    
+
     def clear(self):
         self._store.clear()
-

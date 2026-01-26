@@ -1,6 +1,6 @@
 # 🎬 Movie Query Engine – Backend
 
-This is the backend service for the **Movie Query Engine**, built using **FastAPI**.  
+This is the backend service for the **Movie Query Engine**, built using **FastAPI**.
 It allows users to search movies using natural language queries and fetch detailed movie information using the **TMDB API**, with optional **LLM-based intent extraction**.
 
 ---
@@ -131,4 +131,3 @@ GET /api/search
 GET /api/movies/{movie_id}
 
 ---
-

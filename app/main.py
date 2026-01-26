@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.api.routes.movies import router as movies_router
 from app.api.routes.search import router as search_router
 
@@ -15,4 +16,3 @@ app.add_middleware(
 
 app.include_router(movies_router)
 app.include_router(search_router)
-
